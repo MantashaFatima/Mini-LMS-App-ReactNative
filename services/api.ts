@@ -29,7 +29,6 @@ const fetchWithRetry = async (
       (error.name === 'AbortError' ||
         error.message?.includes('Network request failed'))
     ) {
-      console.log('🔁 Retry API call...', url);
       await delay(RETRY_DELAY);
       return fetchWithRetry(url, options, retries - 1);
     }
@@ -44,8 +43,6 @@ export const api = {
   // =====================
   async getInstructors(): Promise<Instructor[]> {
     try {
-      console.log('👨‍🏫 Fetching instructors...');
-
       const response = await fetchWithRetry(
         `${API_BASE}/public/randomusers?page=1&limit=20`
       );
@@ -55,9 +52,6 @@ export const api = {
       }
 
       const data = await response.json();
-
-      console.log('📥 RAW USERS:', data.data.data);
-
       return data.data.data.map((user: any) => ({
         id: user.id,
 
@@ -77,7 +71,6 @@ export const api = {
         role: 'Instructor',
       }));
     } catch (error) {
-      console.log('❌ Instructor Error:', error);
       throw new Error('Failed to load instructors');
     }
   },
@@ -87,8 +80,6 @@ export const api = {
   // =====================
   async getCourses(): Promise<Course[]> {
     try {
-      console.log('📚 Fetching courses...');
-
       const response = await fetchWithRetry(
         `${API_BASE}/public/randomproducts?page=1&limit=20`
       );
@@ -98,9 +89,6 @@ export const api = {
       }
 
       const data = await response.json();
-
-      console.log('📥 RAW PRODUCTS:', data.data.data);
-
       return data.data.data.map((product: any) => ({
         id: product.id,
 
@@ -128,7 +116,6 @@ export const api = {
         instructorId: Math.floor(Math.random() * 20) + 1,
       }));
     } catch (error) {
-      console.log('❌ Courses Error:', error);
       throw new Error('Failed to load courses');
     }
   },
@@ -156,7 +143,6 @@ export const api = {
         instructor,
       };
     } catch (error) {
-      console.log('❌ Single course error:', error);
       throw error;
     }
   },

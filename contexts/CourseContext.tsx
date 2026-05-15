@@ -30,30 +30,18 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
 
   const loadData = async () => {
     try {
-      console.log('🚀 [CourseContext] Loading started');
-
       setIsLoading(true);
       setError(null);
 
       const cached = await AsyncStorage.getItem(COURSES_KEY);
-      console.log('📦 Cached data:', cached ? 'FOUND' : 'NOT FOUND');
-
       if (cached) {
         const parsed = JSON.parse(cached);
-        console.log('📦 Cached courses count:', parsed.length);
         setCourses(parsed);
       }
-
-      console.log('🌐 Calling APIs...');
-
       const [coursesData, instructorsData] = await Promise.all([
         api.getCourses(),
         api.getInstructors(),
       ]);
-
-      console.log('📚 COURSES API RESPONSE:', coursesData);
-      console.log('👨‍🏫 INSTRUCTORS API RESPONSE:', instructorsData);
-
       const merged = coursesData.map(course => {
         const instructor = instructorsData.find(i => i.id === course.instructorId);
 
@@ -63,35 +51,23 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
           isBookmarked: false,
         };
       });
-
-      console.log('🔗 MERGED DATA SAMPLE:', merged.slice(0, 2));
-      console.log('📊 Courses Count:', merged.length);
-      console.log('📊 Instructors Count:', instructorsData.length);
-
       setCourses(merged);
       setInstructors(instructorsData);
 
       await AsyncStorage.setItem(COURSES_KEY, JSON.stringify(merged));
-
-      console.log('💾 Data saved to AsyncStorage');
     } catch (err) {
-      console.log('❌ ERROR in CourseContext:', err);
       setError('Failed to load courses. Please try again.');
     } finally {
       setIsLoading(false);
-      console.log('✅ Loading finished');
     }
   };
 
   const refreshCourses = useCallback(async () => {
-    console.log('🔄 Refresh triggered');
     await loadData();
   }, []);
 
   const toggleBookmark = useCallback(async (courseId: number) => {
     try {
-      console.log('🔖 Toggle bookmark:', courseId);
-
       let updatedBookmarkCount = 0;
 
       setCourses(prev => {
@@ -102,13 +78,9 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
         );
 
         updatedBookmarkCount = updated.filter(c => c.isBookmarked).length;
-        console.log('📌 Updated bookmarks:', updatedBookmarkCount);
-
         AsyncStorage.setItem(COURSES_KEY, JSON.stringify(updated));
         return updated;
       });
-
-      console.log('📊 Bookmark count:', updatedBookmarkCount);
       await NotificationService.checkAndSendBookmarkNotification(updatedBookmarkCount);
 
     } catch (err) {
@@ -118,13 +90,9 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
 
   const searchCourses = useCallback(
     (query: string) => {
-      console.log('🔍 Search query:', query);
-
       if (!query.trim()) {
-        console.log('📋 Returning all courses:', courses.length);
         return courses;
       }
-
       const q = query.toLowerCase();
 
       const filtered = courses.filter(course =>
@@ -133,9 +101,6 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
         course.category?.toLowerCase().includes(q) ||
         course.instructor?.name?.toLowerCase().includes(q)
       );
-
-      console.log('🔎 Filtered results:', filtered.length);
-
       return filtered;
     },
     [courses]

@@ -27,9 +27,6 @@ function CourseItem({
   onBookmarkToggle: (courseId: number) => void;
 }) {
   const [imageError, setImageError] = useState(false);
-
-  console.log('🖼 Course card image source:', course.id, course.image);
-
   return (
     <Link href={`/course/${course.id}`} asChild>
       <TouchableOpacity
@@ -56,12 +53,6 @@ function CourseItem({
               placeholder="placeholder"
               contentFit="cover"
               onError={(error) => {
-                console.log(
-                  '❌ Course image failed to load, showing placeholder:',
-                  course.id,
-                  course.image,
-                  error
-                );
                 setImageError(true);
               }}
             />

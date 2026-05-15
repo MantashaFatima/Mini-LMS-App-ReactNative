@@ -32,19 +32,6 @@ export default function ProfileScreen() {
   const bookmarkedCoursesList = courses.filter(
     (course) => course.isBookmarked
   );
-
-  useEffect(() => {
-    console.log('📌 Bookmarked courses count:', bookmarkedCoursesList.length);
-    console.log(
-      '📌 Bookmarked course images:',
-      bookmarkedCoursesList.map((course) => ({
-        id: course.id,
-        title: course.title,
-        image: course.image,
-      }))
-    );
-  }, [bookmarkedCoursesList]);
-
   const enrolledCoursesCount = courses.length;
   const completedCoursesCount = Math.floor(enrolledCoursesCount * 0.3);
 

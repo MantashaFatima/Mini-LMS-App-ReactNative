@@ -36,12 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // =========================
   const checkAuthState = async () => {
     try {
-      console.log('🔐 Checking auth state...');
-
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
-
-      console.log('🔑 Stored Token:', token ? 'EXISTS' : 'NOT FOUND');
-
       if (!token) {
         setIsLoading(false);
         return;
@@ -53,17 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log('📥 /users/me status:', response.status);
-
-      // ❌ FIX: HTML response crash protection
       const text = await response.text();
 
       let userData;
       try {
         userData = JSON.parse(text);
       } catch (err) {
-        console.log('❌ Invalid JSON from /users/me:', text);
         await SecureStore.deleteItemAsync(TOKEN_KEY);
         setUser(null);
         setIsLoading(false);
@@ -71,10 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (response.ok) {
-        console.log('✅ Auth valid user:', userData?.data);
         setUser(userData.data);
       } else {
-        console.log('❌ Invalid token, clearing...');
         await SecureStore.deleteItemAsync(TOKEN_KEY);
       }
     } catch (error) {
@@ -89,8 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // =========================
   const login = async (email: string, password: string) => {
     try {
-      console.log('📤 LOGIN REQUEST:', { email });
-
       const response = await fetch(`${API_BASE}/users/login`, {
         method: 'POST',
         headers: {
@@ -100,24 +86,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const data = await response.json();
-
-      console.log('📥 LOGIN RESPONSE:', data);
-
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
 
       const { accessToken, user: userData } = data.data;
-
-      console.log('🔑 Token received:', accessToken ? 'YES' : 'NO');
-      console.log('👤 User:', userData);
-
       await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
       setUser(userData);
-
-      console.log('✅ LOGIN SUCCESS');
     } catch (error) {
-      console.log('❌ LOGIN ERROR:', error);
       Alert.alert(
         'Login Failed',
         error instanceof Error ? error.message : 'Something went wrong'
@@ -136,8 +112,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string
   ) => {
     try {
-      console.log('📤 REGISTER REQUEST:', { username, email });
-
       const response = await fetch(`${API_BASE}/users/register`, {
         method: 'POST',
         headers: {
@@ -147,25 +121,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const data = await response.json();
-
-      console.log('📥 REGISTER RESPONSE:', data);
-
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
       }
-
       const userData = data.data.user || data.data;
-
-      console.log('✅ REGISTER SUCCESS:', userData);
-
       try {
         await login(email, password);
       } catch (err) {
-        console.log('⚠️ Auto login failed, setting user only');
         setUser(userData);
       }
     } catch (error) {
-      console.log('❌ REGISTER ERROR:', error);
       Alert.alert(
         'Registration Failed',
         error instanceof Error ? error.message : 'Something went wrong'
@@ -178,7 +143,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // LOGOUT
   // =========================
   const logout = async () => {
-    console.log('🚪 Logging out...');
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     setUser(null);
   };
@@ -201,7 +165,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (response.ok) {
-        console.log('🔄 Token refreshed');
         await SecureStore.setItemAsync(
           TOKEN_KEY,
           data.data.accessToken
